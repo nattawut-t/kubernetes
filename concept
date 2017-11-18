@@ -1,0 +1,33 @@
+[ประกอบด้วย]
+
+    1. Container
+        - อยู่ใน pod
+
+    2. Pod
+        - กลุ่มของ container ที่ทำงานอย่างเดียวกัน
+        - ปกติแล้วจะมีแค่ 1 container เท่านั้น
+        - มีแค่บางกรณีที่ 1 pod มี 2 หรือ 3 containers
+
+    3. Replica Controller (Replica Set)
+        - ดูแล pod ให้มีจำนวนตามที่เรา config ไว้
+
+    4. Deployment
+        - อยู่บนสุด
+        - เวลา config ทำแค่ deployment เท่านั้น
+        - กำหนดว่าประกอบด้วย pod อะไรบ้าง และ pod หนึ่งประกอบด้วย container อะไรบ้าง
+
+    5. Service
+    6. Stateful Set
+
+[Concept]
+High availability (HA)
+    
+    - Master 
+        - API
+        - มี 1, 3, 5, 7 เพื่อทำ cluster กันได้ ทำ high availability ของ cluster
+    - Node
+
+Resource Management
+    - Master มี schedule ดูแล node ตัวไหนเต็มจะไม่ deploy เพิ่ม
+
+Load Balancer
