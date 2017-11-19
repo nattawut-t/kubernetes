@@ -10,24 +10,127 @@
 
     3. Replica Controller (Replica Set)
         - ดูแล pod ให้มีจำนวนตามที่เรา config ไว้
+        - ถูกสร้างขึ้นมาพร้อมกับ deployment
 
     4. Deployment
         - อยู่บนสุด
         - เวลา config ทำแค่ deployment เท่านั้น
         - กำหนดว่าประกอบด้วย pod อะไรบ้าง และ pod หนึ่งประกอบด้วย container อะไรบ้าง
+        - [Rolling Update]
+            - เช่น มี app v1 อยู่ใน 3 pod (3 nodes: N1, N2, N3)
+            - ต้องการ update v2
+            - rolling update จะทำ (by default, without any configs, config in deployment)
+            - @N1
+                - สร้าง pod v2
+                - ใส่ load balancer ไปที่ pod v2
+                - ตัด load balancer จาก v1 ออก
+                - ลบ pod v1 ทิ้ง
+            - @N2 ทำเหมือน @N1
+            - @N3 ทำเหมือน @N1
+        - [Zero Downtime]
+            - ต้องมี health check
+            - [liveness]
+                - เช็ค container ว่ายัง healthy อยู่มั้ย
+                - เช็คเป็น interval (เช็คเรื่อยๆ)
+                - สามารถเช็คได้หลายแบบ 
+                    - เช็ค port ว่าเปิดอยู่หรือ่ปาว
+                    - เช็คเป็น http
+                    - เช็คเป็น http แล้วดู return code
+            - [readiness]
+                - เช็คตอน container start
+                - เช็คว่า container ready แล้วหรือยัง
+                - ใช้ตอน update version เมื่อ container ready แล้ว service จึงใส่ load balander ไปที pod version ใหม่
 
     5. Service
-    6. Stateful Set
+        - สำหรับ load balancer
+        - external access container หรือ
+        - ms container A กับ B จะคุยกัน ต้องคุยผ่าน services
+        - service อยู่ด้านหน้า หรือด้านบน deployment
+        - [Discovery Services]
+            - เช่น ms A config เป็น
+
+            apiVersion: v1
+                kind: Service
+                metadata:
+                name: my-nginx
+                labels:
+                    run: my-nginx
+            ...
+
+            - ms B สามารถเรียกใช้ ms A ได้โดยผ่าน http://my-nginx ได้เลย
+            - ถ้ามี 3, 5, 7 pods ก็ทำ load balander ให้เลย
+        - [Label]
+            - เหมือน git tag
+            - ทุก kind เช่น service, deployment, pod สามารถแปะ label ลงไปได้หมด
+            - ถ้า ms มี pod A, B, C, D, ... service จะรู้ว่าจะวิ่งไปที่ pod ไหนโดยใช้ [Selector] ผ่าน label
+
+            apiVersion: v1
+                kind: Service
+            ...
+            spec:
+            ...
+                selector:
+                    run: my-nginx
+
+
+            apiVersion: apps/v1beta1
+                kind: Deployment
+            ...
+            spec:
+                replicas: 1
+                template:
+                    metadata:
+                    labels:
+                        run: my-nginx
+
+    6. Stateful Sets
 
 [Concept]
-High availability (HA)
+
+    - Config เรียกว่า kubernetes manifest
+    - [High availability] (HA)
     
-    - Master 
-        - API
-        - มี 1, 3, 5, 7 เพื่อทำ cluster กันได้ ทำ high availability ของ cluster
-    - Node
+        - [Master] 
+            - เป็น VM หรือเครื่อง server เครื่องหนึ่ง
+            - API
+            - มี 1, 3, 5, 7 เพื่อทำ cluster กันได้ ทำ high availability ของ cluster
 
-Resource Management
-    - Master มี schedule ดูแล node ตัวไหนเต็มจะไม่ deploy เพิ่ม
+        - [Node]
+            - ข้างในมี pod
+            - ข้างใน pod จะมี container
+            - เมื่อ node ตัวหนึ่งตายไป จะมีการสร้าง node ตัวใหม่ขึ้นมาทดแทน
 
-Load Balancer
+    - Resource Management
+        - Scheduler ดูแล 
+        - ถ้ามี node หลายๆ เครื่องจะจัดการ resource ให้เอง
+        - ถ้า node ตัวไหนเต็มจะไม่ deploy เพิ่ม
+        - ถ้า node ไหนมี cpu เท่าไหร่ ram เท่าไหร่
+        - ถ้าเครื่องไหนใช้น้อยก็เติมให้เท่ากัน
+        - ของชนิดเดียวกันไม่ควรอยู่เครื่องเดียวกัน 
+            เช่น เรามี 3 nodes ต้องการ deploy ms A 3 containers 
+            ก็จะมี replica เท่ากับ 3
+            เมื่อเราเปลี่ยน config เป็น 4 replica 
+            ตัว replica controller ก็จะสร้าง container ใน node หนึ่งให้มี 2 containers
+        - เป็น feature out of box คือ ไม่ต้องมา manage เองทีละเครืื่อง
+            แค่สร้าง kubernetes cluster แล้วสั่ง deploy ไม่ต้องทำอะไรมากกว่านี้
+        - Config เองได้
+        - ปกติใช้ค่า default
+
+    - [Load Balancer]
+        - มี 3 types
+            - [NodePort]
+                - เหมาะสำหรับ run local (เครื่องเดียว ip เดียว)
+                - ต้อง expose port เหมือน docker
+            - [LoadBalancer]
+                - ใช้ได้บน public cloud เท่านั้น
+                - เช่น AWS มี elastic load balancer (ELB)
+                - ขอ ip จริงจาก load balancer แล้วยิง load balancer เข้ามาข้างในให้เลย
+            - [ClusterIP]
+                - เป็น ip ที่อยู่ข้างใน network
+                - ms A คุย ms B ได้เท่านั้น
+                - external access ไม่ได้
+            - [Ingress]
+                - สำหรับตั้ง server ใช้เอง
+    
+    - Security
+        - [Secret]
