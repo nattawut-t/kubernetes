@@ -1,0 +1,22 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: authen-api-deployment
+  labels:
+    app: authen-api
+spec:
+  selector:
+    matchLabels:
+      app: authen-api
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: authen-api
+    spec:
+      containers:
+      - name: authen-api
+        image: gcr.io/dark-garden-166716/authen-api:1.0.0
+        # imagePullPolicy: Never
+        ports:
+        - containerPort: 3000
