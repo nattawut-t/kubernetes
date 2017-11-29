@@ -1,0 +1,1 @@
+kubectl expose deployment url-shortener-app --type=LoadBalancer

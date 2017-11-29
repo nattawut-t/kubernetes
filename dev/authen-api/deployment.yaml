@@ -1,7 +1,7 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: authen-api-deployment
+  name: authen-api
   labels:
     app: authen-api
 spec:

@@ -1,0 +1,19 @@
+Name:                     authen-api-deployment
+Namespace:                default
+Labels:                   app=authen-api
+Annotations:              <none>
+Selector:                 app=authen-api
+Type:                     LoadBalancer
+IP:                       10.23.244.165
+LoadBalancer Ingress:     35.198.215.103
+Port:                     <unset>  3000/TCP
+TargetPort:               3000/TCP
+NodePort:                 <unset>  31212/TCP
+Endpoints:                10.20.0.8:3000,10.20.1.6:3000,10.20.2.8:3000
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:
+  Type    Reason                Age   From                Message
+  ----    ------                ----  ----                -------
+  Normal  CreatingLoadBalancer  7m    service-controller  Creating load balancer
+  Normal  CreatedLoadBalancer   6m    service-controller  Created load balancer

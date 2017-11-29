@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: url-shortener-app
+  labels:
+    app: url-shortener-app
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    # name: http
+  selector:
+    run: url-shortener-app
+
+# output example
+# 
+# kubectl get service -o yaml
+# 
+# apiVersion: v1
+#   kind: Service
+#   metadata:
+#     creationTimestamp: 2017-11-29T15:32:26Z
+#     labels:
+#       app: url-shortener-app
+#     name: url-shortener-app
+#     namespace: default
+#     resourceVersion: "1024170"
+#     selfLink: /api/v1/namespaces/default/services/url-shortener-app
+#     uid: 80955242-d51a-11e7-89e9-42010a940090
+#   spec:
+#     clusterIP: 10.23.248.62
+#     externalTrafficPolicy: Cluster
+#     ports:
+#     - nodePort: 30517
+#       port: 8080
+#       protocol: TCP
+#       targetPort: 8080
+#     selector:
+#       app: url-shortener-app
+#     sessionAffinity: None
+#     type: LoadBalancer
+#   status:
+#     loadBalancer:
+#       ingress:
+#       - ip: 35.197.154.218
