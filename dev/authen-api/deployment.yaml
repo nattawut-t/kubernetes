@@ -17,6 +17,6 @@ spec:
       containers:
       - name: authen-api
         image: gcr.io/dark-garden-166716/authen-api:1.0.0
-        # imagePullPolicy: Never
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
